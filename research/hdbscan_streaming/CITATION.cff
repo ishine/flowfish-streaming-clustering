@@ -4,7 +4,7 @@ title: "FlowFish: Selective Density Maintenance for Low-Latency Streaming Speake
 type: software
 version: "0.1.0"
 date-released: 2026-09-28
-repository-code: "https://github.com/yingzhou-bjtu/speaker-deploy"
+repository-code: "https://github.com/yingzhou-bjtu/flowfish-streaming-clustering"
 keywords:
   - streaming speaker clustering
   - speaker diarization

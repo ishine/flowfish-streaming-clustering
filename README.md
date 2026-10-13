@@ -1,4 +1,4 @@
-# FlowFish: Reproducible Streaming Speaker Clustering
+# FlowFish Streaming Clustering Artifact
 
 This repository contains the reference implementation and reproducibility
 package for **FlowFish**, a selective-maintenance policy for streaming density
@@ -13,9 +13,7 @@ while uncertain arrivals enter a bounded refresh path maintained by a
 background FISHDBC worker.
 
 The public repository is intentionally scoped to the paper-facing code and
-evidence:
-
-See [docs/OPEN_SOURCE_STANDARD.md](docs/OPEN_SOURCE_STANDARD.md) for the repository layout, artifact, and validation policy.
+evidence. See [docs/PROJECT_IDENTITY.md](docs/PROJECT_IDENTITY.md) for the public name and repository slug, and [docs/OPEN_SOURCE_STANDARD.md](docs/OPEN_SOURCE_STANDARD.md) for the artifact and validation policy.
 
 - benchmark implementations for FlowFish and comparison methods;
 - committed synthetic and derived embedding fixtures;

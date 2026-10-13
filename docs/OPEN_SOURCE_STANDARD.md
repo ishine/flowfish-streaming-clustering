@@ -2,7 +2,7 @@
 
 ## Repository Class
 
-- Repository: `yingzhou-bjtu/speaker-deploy`
+- Repository: `yingzhou-bjtu/flowfish-streaming-clustering`
 - Class: Paper reproduction package
 - Public scope: FlowFish streaming speaker clustering implementation and release artifacts.
 
