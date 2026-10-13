@@ -15,6 +15,8 @@ background FISHDBC worker.
 The public repository is intentionally scoped to the paper-facing code and
 evidence:
 
+See [docs/OPEN_SOURCE_STANDARD.md](docs/OPEN_SOURCE_STANDARD.md) for the repository layout, artifact, and validation policy.
+
 - benchmark implementations for FlowFish and comparison methods;
 - committed synthetic and derived embedding fixtures;
 - release result summaries, traces, and selected paper figures;
