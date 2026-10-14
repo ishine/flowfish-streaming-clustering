@@ -59,6 +59,16 @@ def test_validate_benchmark_args_rejects_invalid_ranges() -> None:
         raise AssertionError("expected invalid arrival_interval_ms to fail")
 
 
+def test_validate_benchmark_args_reports_missing_fields() -> None:
+    try:
+        validate_benchmark_args(argparse.Namespace(cap=1))
+    except ValueError as exc:
+        assert "tradeoff_full_interval is required" in str(exc)
+    else:
+        raise AssertionError("expected missing benchmark field to fail")
+
+
 if __name__ == "__main__":
     test_async_pair_benchmark_args_exposes_scale_knobs()
     test_validate_benchmark_args_rejects_invalid_ranges()
+    test_validate_benchmark_args_reports_missing_fields()

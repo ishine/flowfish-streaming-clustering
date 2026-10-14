@@ -6,6 +6,7 @@ import argparse
 
 
 def validate_benchmark_args(args: argparse.Namespace) -> argparse.Namespace:
+    missing = object()
     positive_int_fields = (
         "cap",
         "tradeoff_full_interval",
@@ -16,17 +17,26 @@ def validate_benchmark_args(args: argparse.Namespace) -> argparse.Namespace:
         "checkpoint_every",
     )
     for field_name in positive_int_fields:
-        if getattr(args, field_name) < 1:
+        value = getattr(args, field_name, missing)
+        if value is missing:
+            raise ValueError(f"{field_name} is required")
+        if value < 1:
             raise ValueError(f"{field_name} must be at least 1")
 
     nonnegative_fields = ("warmup", "tradeoff_warmup", "arrival_interval_ms")
     for field_name in nonnegative_fields:
-        if getattr(args, field_name) < 0:
+        value = getattr(args, field_name, missing)
+        if value is missing:
+            raise ValueError(f"{field_name} is required")
+        if value < 0:
             raise ValueError(f"{field_name} must be non-negative")
 
     positive_float_fields = ("tradeoff_margin", "tradeoff_max_distance")
     for field_name in positive_float_fields:
-        if getattr(args, field_name) <= 0:
+        value = getattr(args, field_name, missing)
+        if value is missing:
+            raise ValueError(f"{field_name} is required")
+        if value <= 0:
             raise ValueError(f"{field_name} must be greater than 0")
 
     return args
