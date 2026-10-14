@@ -6,6 +6,7 @@ import tempfile
 from pathlib import Path
 
 from output_paths import resolve_generated_stream_paths
+from script_test_runner import run_test_functions
 
 
 def test_resolve_generated_stream_paths_accepts_data_results_and_external() -> None:
@@ -91,6 +92,4 @@ def test_resolve_generated_stream_paths_rejects_directories() -> None:
 
 
 if __name__ == "__main__":
-    for name, test_func in sorted(globals().items()):
-        if name.startswith("test_") and callable(test_func):
-            test_func()
+    run_test_functions(globals())

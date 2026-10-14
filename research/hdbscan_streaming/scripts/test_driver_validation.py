@@ -11,6 +11,7 @@ from driver_validation import validate_nonnegative_ints, validate_positive_float
 from output_paths import resolve_experiment_output_dir
 from run_multiseed_validation import main as multiseed_main
 from run_rate_sweep import main as rate_sweep_main
+from script_test_runner import run_test_functions
 
 
 def test_resolve_experiment_output_dir_accepts_results_and_external() -> None:
@@ -133,6 +134,4 @@ def test_multiseed_cli_rejects_repo_root_output_before_subprocess() -> None:
 
 
 if __name__ == "__main__":
-    for name, test_func in sorted(globals().items()):
-        if name.startswith("test_") and callable(test_func):
-            test_func()
+    run_test_functions(globals())

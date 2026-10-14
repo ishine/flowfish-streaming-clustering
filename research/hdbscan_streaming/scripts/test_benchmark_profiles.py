@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 
 from benchmark_profiles import async_pair_benchmark_args, validate_benchmark_args
+from script_test_runner import run_test_functions
 
 
 def test_async_pair_benchmark_args_exposes_scale_knobs() -> None:
@@ -91,6 +92,4 @@ def test_validate_benchmark_args_reports_missing_fields() -> None:
 
 
 if __name__ == "__main__":
-    for name, test_func in sorted(globals().items()):
-        if name.startswith("test_") and callable(test_func):
-            test_func()
+    run_test_functions(globals())

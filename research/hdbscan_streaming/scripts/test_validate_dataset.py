@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 
 from output_paths import write_text_atomic
+from script_test_runner import run_test_functions
 from validate_dataset import main, resolve_report_path, validate_common_npz
 
 
@@ -165,6 +166,4 @@ def test_write_text_atomic_replaces_report_without_temp_files() -> None:
 
 
 if __name__ == "__main__":
-    for name, test_func in sorted(globals().items()):
-        if name.startswith("test_") and callable(test_func):
-            test_func()
+    run_test_functions(globals())
