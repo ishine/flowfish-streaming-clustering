@@ -9,6 +9,8 @@ from typing import Sequence
 
 import numpy as np
 
+from output_paths import write_text_atomic
+
 
 def validate_common_npz(data_path: Path, min_speakers: int) -> dict[str, object]:
     with np.load(data_path, allow_pickle=False) as payload:
@@ -85,8 +87,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     result_json = json.dumps(result, indent=2, ensure_ascii=False)
     print(result_json)
     if json_out is not None:
-        json_out.parent.mkdir(parents=True, exist_ok=True)
-        json_out.write_text(result_json + "\n", encoding="utf-8")
+        write_text_atomic(json_out, result_json + "\n")
     return 0
 
 

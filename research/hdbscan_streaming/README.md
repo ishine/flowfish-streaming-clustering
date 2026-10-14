@@ -187,7 +187,9 @@ The common dataset contract is a non-empty NPZ file with finite 2-D `X`
 embeddings and finite integer 1-D speaker labels in `y`. Synthetic stream
 generators write `.npz` data and `.json` metadata; repository-local outputs
 must stay under `data/` or `results/`. When retaining a JSON validation report,
-pass `--json-out` with a `.json` path that is distinct from the input dataset.
+pass `--json-out` with a `.json` path that is distinct from the input dataset;
+the report is written through a same-directory temporary file and atomically
+replaced.
 Experiment driver output directories are stricter: repository-local `--out`
 directories must stay under `results/`, while external scratch directories are
 allowed. Driver interval lists and benchmark profile float fields must be

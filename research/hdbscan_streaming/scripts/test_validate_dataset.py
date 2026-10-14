@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
+from output_paths import write_text_atomic
 from validate_dataset import main, resolve_report_path, validate_common_npz
 
 
@@ -151,6 +152,18 @@ def test_resolve_report_path_accepts_json_artifact() -> None:
         assert report.name == "sample.json"
 
 
+def test_write_text_atomic_replaces_report_without_temp_files() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        report = Path(tmp) / "results" / "sample.json"
+        report.parent.mkdir()
+        report.write_text('{"old": true}\n', encoding="utf-8")
+
+        write_text_atomic(report, '{"new": true}\n')
+
+        assert report.read_text(encoding="utf-8") == '{"new": true}\n'
+        assert not list(report.parent.glob(".sample.json.*.tmp"))
+
+
 if __name__ == "__main__":
     test_validate_common_npz_accepts_dataset()
     test_validate_common_npz_rejects_too_few_speakers()
@@ -162,3 +175,4 @@ if __name__ == "__main__":
     test_resolve_report_path_rejects_non_json_suffix()
     test_resolve_report_path_rejects_directory()
     test_resolve_report_path_accepts_json_artifact()
+    test_write_text_atomic_replaces_report_without_temp_files()

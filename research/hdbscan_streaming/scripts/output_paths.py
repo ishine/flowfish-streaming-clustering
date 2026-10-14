@@ -1,7 +1,9 @@
 """Output path validation helpers for benchmark data generators."""
 from __future__ import annotations
 
+import os
 from pathlib import Path
+import tempfile
 
 
 RESEARCH_ROOT = Path(__file__).resolve().parents[1]
@@ -67,3 +69,25 @@ def resolve_experiment_output_dir(
         raise ValueError("--out inside the repository must be under results/")
 
     return resolved_out
+
+
+def write_text_atomic(path: Path, content: str, encoding: str = "utf-8") -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding=encoding,
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temp_file:
+            temp_path = Path(temp_file.name)
+            temp_file.write(content)
+            temp_file.flush()
+            os.fsync(temp_file.fileno())
+        temp_path.replace(path)
+    finally:
+        if temp_path is not None and temp_path.exists():
+            temp_path.unlink()
