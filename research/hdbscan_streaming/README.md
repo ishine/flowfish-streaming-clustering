@@ -181,6 +181,9 @@ evidence:
 
 ## Lightweight Validation
 
+The common dataset contract is a non-empty NPZ file with finite 2-D `X`
+embeddings and finite integer 1-D speaker labels in `y`.
+
 Run these checks before changing benchmark drivers:
 
 ```bash

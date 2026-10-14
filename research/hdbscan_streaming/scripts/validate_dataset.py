@@ -18,9 +18,19 @@ def validate_common_npz(data_path: Path, min_speakers: int) -> dict[str, object]
         y = np.asarray(payload["y"])
     if X.ndim != 2 or y.ndim != 1 or X.shape[0] != y.shape[0]:
         raise ValueError(f"invalid shape contract: X={X.shape}, y={y.shape}")
+    if X.shape[0] == 0:
+        raise ValueError("dataset must contain at least one row")
     if not np.isfinite(X).all():
         raise ValueError("X contains NaN or Inf")
-    speakers = int(np.unique(y).size)
+    if not np.issubdtype(y.dtype, np.number):
+        raise ValueError("y must contain numeric integer speaker labels")
+    if not np.isfinite(y).all():
+        raise ValueError("y contains NaN or Inf")
+    if not np.equal(y, np.floor(y)).all():
+        raise ValueError("y must contain integer speaker labels")
+
+    y_labels = y.astype(np.int64, copy=False)
+    speakers = int(np.unique(y_labels).size)
     if speakers < min_speakers:
         raise ValueError(f"expected at least {min_speakers} speakers, got {speakers}")
     return {
@@ -28,10 +38,11 @@ def validate_common_npz(data_path: Path, min_speakers: int) -> dict[str, object]
         "n": int(X.shape[0]),
         "dim": int(X.shape[1]),
         "dtype": str(X.dtype),
+        "label_dtype": str(y.dtype),
         "speakers": speakers,
         "class_counts": {
             str(int(k)): int(v)
-            for k, v in zip(*np.unique(y, return_counts=True))
+            for k, v in zip(*np.unique(y_labels, return_counts=True))
         },
         "row_norm_min": float(np.linalg.norm(X, axis=1).min()),
         "row_norm_max": float(np.linalg.norm(X, axis=1).max()),

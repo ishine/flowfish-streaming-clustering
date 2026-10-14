@@ -18,6 +18,10 @@ def write_npz(path: Path, labels: list[int]) -> None:
     np.savez(path, X=X, y=y)
 
 
+def write_raw_npz(path: Path, X: np.ndarray, y: np.ndarray) -> None:
+    np.savez(path, X=X, y=y)
+
+
 def test_validate_common_npz_accepts_dataset() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "sample.npz"
@@ -25,6 +29,7 @@ def test_validate_common_npz_accepts_dataset() -> None:
         report = validate_common_npz(path, min_speakers=2)
         assert report["n"] == 3
         assert report["dim"] == 3
+        assert report["label_dtype"] == "int64"
         assert report["speakers"] == 2
 
 
@@ -38,6 +43,54 @@ def test_validate_common_npz_rejects_too_few_speakers() -> None:
             assert "expected at least 2 speakers" in str(exc)
         else:
             raise AssertionError("validator accepted a single-speaker dataset")
+
+
+def test_validate_common_npz_rejects_non_integer_labels() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "sample.npz"
+        write_raw_npz(
+            path,
+            np.eye(3, 3, dtype=np.float32),
+            np.asarray([0.0, 0.5, 1.0], dtype=np.float32),
+        )
+        try:
+            validate_common_npz(path, min_speakers=2)
+        except ValueError as exc:
+            assert "integer speaker labels" in str(exc)
+        else:
+            raise AssertionError("validator accepted non-integer labels")
+
+
+def test_validate_common_npz_rejects_non_finite_labels() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "sample.npz"
+        write_raw_npz(
+            path,
+            np.eye(3, 3, dtype=np.float32),
+            np.asarray([0.0, np.nan, 1.0], dtype=np.float32),
+        )
+        try:
+            validate_common_npz(path, min_speakers=2)
+        except ValueError as exc:
+            assert "y contains NaN or Inf" in str(exc)
+        else:
+            raise AssertionError("validator accepted non-finite labels")
+
+
+def test_validate_common_npz_rejects_empty_dataset() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "sample.npz"
+        write_raw_npz(
+            path,
+            np.empty((0, 3), dtype=np.float32),
+            np.asarray([], dtype=np.int64),
+        )
+        try:
+            validate_common_npz(path, min_speakers=1)
+        except ValueError as exc:
+            assert "at least one row" in str(exc)
+        else:
+            raise AssertionError("validator accepted an empty dataset")
 
 
 def test_cli_rejects_invalid_min_speakers() -> None:
@@ -56,4 +109,7 @@ def test_cli_rejects_invalid_min_speakers() -> None:
 if __name__ == "__main__":
     test_validate_common_npz_accepts_dataset()
     test_validate_common_npz_rejects_too_few_speakers()
+    test_validate_common_npz_rejects_non_integer_labels()
+    test_validate_common_npz_rejects_non_finite_labels()
+    test_validate_common_npz_rejects_empty_dataset()
     test_cli_rejects_invalid_min_speakers()
