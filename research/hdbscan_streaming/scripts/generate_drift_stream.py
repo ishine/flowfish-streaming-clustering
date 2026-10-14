@@ -8,6 +8,8 @@ from pathlib import Path
 
 import numpy as np
 
+from output_paths import resolve_generated_stream_paths
+
 
 RESEARCH_ROOT = Path(__file__).resolve().parents[1]
 
@@ -61,12 +63,18 @@ def main() -> None:
     p.add_argument("--noise", type=float, default=0.12)
     p.add_argument("--max-center-similarity", type=float, default=0.45)
     args = p.parse_args()
+    try:
+        out_path, meta_path = resolve_generated_stream_paths(args.out, args.meta)
+    except ValueError as exc:
+        p.error(str(exc))
+
     X, y, meta = build_stream(args.speakers, args.points, args.dim, args.seed, args.drift,
                                args.noise, args.max_center_similarity)
-    args.out.parent.mkdir(parents=True, exist_ok=True); args.meta.parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(args.out, X=X, y=y)
-    meta = {**meta, "n": int(len(y)), "out": metadata_path(args.out)}
-    args.meta.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    meta_path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(out_path, X=X, y=y)
+    meta = {**meta, "n": int(len(y)), "out": metadata_path(out_path)}
+    meta_path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(meta, ensure_ascii=False))
 
 

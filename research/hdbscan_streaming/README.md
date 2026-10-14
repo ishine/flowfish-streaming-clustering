@@ -158,6 +158,8 @@ the plotting scripts preserve publication-quality assets for the paper build.
 | `scripts/download_fsdd.sh` | pinned FSDD download, checksum, extraction, and provenance |
 | `scripts/prepare_fsdd_audio.py` | deterministic balanced audio manifest |
 | `scripts/audio_to_embeddings.py` | standalone ONNX audio-to-embedding conversion |
+| `scripts/generate_stream.py` | deterministic synthetic stream generation |
+| `scripts/generate_drift_stream.py` | synthetic drift and late-speaker stream generation |
 | `scripts/validate_dataset.py` | common NPZ dataset contract validation |
 | `scripts/run_audio_smoke.sh` | real-audio embedding and clustering smoke |
 | `scripts/run_full_baseline.sh` | fixture-only Full HDBSCAN baseline |
@@ -182,14 +184,16 @@ evidence:
 ## Lightweight Validation
 
 The common dataset contract is a non-empty NPZ file with finite 2-D `X`
-embeddings and finite integer 1-D speaker labels in `y`. When retaining a JSON
-validation report, pass `--json-out` with a `.json` path that is distinct from
-the input dataset.
+embeddings and finite integer 1-D speaker labels in `y`. Synthetic stream
+generators write `.npz` data and `.json` metadata; repository-local outputs
+must stay under `data/` or `results/`. When retaining a JSON validation report,
+pass `--json-out` with a `.json` path that is distinct from the input dataset.
 
 Run these checks before changing benchmark drivers:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_benchmark_profiles.py
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_generate_stream_outputs.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_validate_dataset.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_dataset.py data/synthetic_smoke.npz
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_benchmark.py --help
