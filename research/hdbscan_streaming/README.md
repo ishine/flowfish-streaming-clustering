@@ -158,6 +158,7 @@ the plotting scripts preserve publication-quality assets for the paper build.
 | `scripts/download_fsdd.sh` | pinned FSDD download, checksum, extraction, and provenance |
 | `scripts/prepare_fsdd_audio.py` | deterministic balanced audio manifest |
 | `scripts/audio_to_embeddings.py` | standalone ONNX audio-to-embedding conversion |
+| `scripts/validate_dataset.py` | common NPZ dataset contract validation |
 | `scripts/run_audio_smoke.sh` | real-audio embedding and clustering smoke |
 | `scripts/run_full_baseline.sh` | fixture-only Full HDBSCAN baseline |
 | `scripts/run_benchmark.py` | common benchmark driver and metrics |
@@ -184,6 +185,8 @@ Run these checks before changing benchmark drivers:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_benchmark_profiles.py
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_validate_dataset.py
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_dataset.py data/synthetic_smoke.npz
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_benchmark.py --help
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/check_release.py
 ```
