@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
-from validate_dataset import main, validate_common_npz
+from validate_dataset import main, resolve_report_path, validate_common_npz
 
 
 def write_npz(path: Path, labels: list[int]) -> None:
@@ -106,6 +106,51 @@ def test_cli_rejects_invalid_min_speakers() -> None:
             raise AssertionError("CLI accepted an invalid min-speakers value")
 
 
+def test_resolve_report_path_rejects_input_overwrite() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "sample.json"
+        try:
+            resolve_report_path(path, path)
+        except ValueError as exc:
+            assert "must not overwrite" in str(exc)
+        else:
+            raise AssertionError("json_out accepted an input overwrite path")
+
+
+def test_resolve_report_path_rejects_non_json_suffix() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "sample.npz"
+        write_npz(path, [0, 1])
+        try:
+            resolve_report_path(Path(tmp) / "report.txt", path)
+        except ValueError as exc:
+            assert "must end with .json" in str(exc)
+        else:
+            raise AssertionError("json_out accepted a non-json suffix")
+
+
+def test_resolve_report_path_rejects_directory() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "sample.npz"
+        write_npz(path, [0, 1])
+        report_dir = Path(tmp) / "report.json"
+        report_dir.mkdir()
+        try:
+            resolve_report_path(report_dir, path)
+        except ValueError as exc:
+            assert "directory" in str(exc)
+        else:
+            raise AssertionError("json_out accepted a directory")
+
+
+def test_resolve_report_path_accepts_json_artifact() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "sample.npz"
+        write_npz(path, [0, 1])
+        report = resolve_report_path(Path(tmp) / "results" / "sample.json", path)
+        assert report.name == "sample.json"
+
+
 if __name__ == "__main__":
     test_validate_common_npz_accepts_dataset()
     test_validate_common_npz_rejects_too_few_speakers()
@@ -113,3 +158,7 @@ if __name__ == "__main__":
     test_validate_common_npz_rejects_non_finite_labels()
     test_validate_common_npz_rejects_empty_dataset()
     test_cli_rejects_invalid_min_speakers()
+    test_resolve_report_path_rejects_input_overwrite()
+    test_resolve_report_path_rejects_non_json_suffix()
+    test_resolve_report_path_rejects_directory()
+    test_resolve_report_path_accepts_json_artifact()

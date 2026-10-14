@@ -57,17 +57,36 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def resolve_report_path(path: Path, data_path: Path) -> Path:
+    resolved = path.expanduser().resolve()
+    if resolved.suffix.lower() != ".json":
+        raise ValueError(f"json_out must end with .json: {path}")
+    if resolved.exists() and resolved.is_dir():
+        raise ValueError(f"json_out is a directory, not a file: {path}")
+    if resolved == data_path.expanduser().resolve():
+        raise ValueError("json_out must not overwrite the input dataset")
+    return resolved
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.min_speakers < 1:
         parser.error("min_speakers must be positive")
+    try:
+        json_out = (
+            resolve_report_path(args.json_out, args.data)
+            if args.json_out is not None
+            else None
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
     result = validate_common_npz(args.data, args.min_speakers)
     result_json = json.dumps(result, indent=2, ensure_ascii=False)
     print(result_json)
-    if args.json_out is not None:
-        args.json_out.parent.mkdir(parents=True, exist_ok=True)
-        args.json_out.write_text(result_json + "\n", encoding="utf-8")
+    if json_out is not None:
+        json_out.parent.mkdir(parents=True, exist_ok=True)
+        json_out.write_text(result_json + "\n", encoding="utf-8")
     return 0
 
 

@@ -182,7 +182,9 @@ evidence:
 ## Lightweight Validation
 
 The common dataset contract is a non-empty NPZ file with finite 2-D `X`
-embeddings and finite integer 1-D speaker labels in `y`.
+embeddings and finite integer 1-D speaker labels in `y`. When retaining a JSON
+validation report, pass `--json-out` with a `.json` path that is distinct from
+the input dataset.
 
 Run these checks before changing benchmark drivers:
 
