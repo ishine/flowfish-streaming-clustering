@@ -2,6 +2,35 @@
 
 from __future__ import annotations
 
+import argparse
+
+
+def validate_benchmark_args(args: argparse.Namespace) -> argparse.Namespace:
+    positive_int_fields = (
+        "cap",
+        "tradeoff_full_interval",
+        "tradeoff_batch_size",
+        "tradeoff_max_queue",
+        "min_cluster_size",
+        "min_samples",
+        "checkpoint_every",
+    )
+    for field_name in positive_int_fields:
+        if getattr(args, field_name) < 1:
+            raise ValueError(f"{field_name} must be at least 1")
+
+    nonnegative_fields = ("warmup", "tradeoff_warmup", "arrival_interval_ms")
+    for field_name in nonnegative_fields:
+        if getattr(args, field_name) < 0:
+            raise ValueError(f"{field_name} must be non-negative")
+
+    positive_float_fields = ("tradeoff_margin", "tradeoff_max_distance")
+    for field_name in positive_float_fields:
+        if getattr(args, field_name) <= 0:
+            raise ValueError(f"{field_name} must be greater than 0")
+
+    return args
+
 
 def async_pair_benchmark_args(
     *,
@@ -14,6 +43,22 @@ def async_pair_benchmark_args(
     min_cluster_size: int = 3,
     min_samples: int = 2,
 ) -> list[str]:
+    validate_benchmark_args(
+        argparse.Namespace(
+            cap=1,
+            warmup=warmup,
+            tradeoff_warmup=warmup,
+            tradeoff_margin=0.02,
+            tradeoff_max_distance=0.70,
+            tradeoff_full_interval=full_interval,
+            tradeoff_batch_size=batch_size,
+            arrival_interval_ms=interval_ms,
+            tradeoff_max_queue=max_queue,
+            min_cluster_size=min_cluster_size,
+            min_samples=min_samples,
+            checkpoint_every=checkpoint_every,
+        )
+    )
     return [
         "--warmup",
         str(warmup),

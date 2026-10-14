@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from benchmark_profiles import async_pair_benchmark_args
+import argparse
+
+from benchmark_profiles import async_pair_benchmark_args, validate_benchmark_args
 
 
 def test_async_pair_benchmark_args_exposes_scale_knobs() -> None:
@@ -23,5 +25,40 @@ def test_async_pair_benchmark_args_exposes_scale_knobs() -> None:
     assert pairs["--checkpoint-every"] == "80"
 
 
+def test_validate_benchmark_args_rejects_invalid_ranges() -> None:
+    valid = argparse.Namespace(
+        cap=100,
+        warmup=20,
+        tradeoff_warmup=20,
+        tradeoff_margin=0.02,
+        tradeoff_max_distance=0.70,
+        tradeoff_full_interval=8,
+        tradeoff_batch_size=4,
+        arrival_interval_ms=5.0,
+        tradeoff_max_queue=8,
+        min_cluster_size=3,
+        min_samples=2,
+        checkpoint_every=80,
+    )
+    assert validate_benchmark_args(valid) is valid
+
+    invalid_batch = argparse.Namespace(**{**vars(valid), "tradeoff_batch_size": 0})
+    try:
+        validate_benchmark_args(invalid_batch)
+    except ValueError as exc:
+        assert "tradeoff_batch_size" in str(exc)
+    else:
+        raise AssertionError("expected invalid tradeoff_batch_size to fail")
+
+    invalid_interval = argparse.Namespace(**{**vars(valid), "arrival_interval_ms": -1.0})
+    try:
+        validate_benchmark_args(invalid_interval)
+    except ValueError as exc:
+        assert "arrival_interval_ms" in str(exc)
+    else:
+        raise AssertionError("expected invalid arrival_interval_ms to fail")
+
+
 if __name__ == "__main__":
     test_async_pair_benchmark_args_exposes_scale_knobs()
+    test_validate_benchmark_args_rejects_invalid_ranges()

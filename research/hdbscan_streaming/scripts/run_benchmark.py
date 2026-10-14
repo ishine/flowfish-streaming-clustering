@@ -17,6 +17,8 @@ from typing import Any
 
 import numpy as np
 
+from benchmark_profiles import validate_benchmark_args
+
 
 METHODS = (
     "full_hdbscan",
@@ -1214,6 +1216,10 @@ def main() -> None:
         help="关闭默认 L2 行归一化；默认实验会做归一化。",
     )
     args = p.parse_args()
+    try:
+        validate_benchmark_args(args)
+    except ValueError as exc:
+        p.error(str(exc))
     args.prototype_repair = not args.no_prototype_repair
 
     data = np.load(args.data)
