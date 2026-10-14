@@ -165,14 +165,6 @@ def test_write_text_atomic_replaces_report_without_temp_files() -> None:
 
 
 if __name__ == "__main__":
-    test_validate_common_npz_accepts_dataset()
-    test_validate_common_npz_rejects_too_few_speakers()
-    test_validate_common_npz_rejects_non_integer_labels()
-    test_validate_common_npz_rejects_non_finite_labels()
-    test_validate_common_npz_rejects_empty_dataset()
-    test_cli_rejects_invalid_min_speakers()
-    test_resolve_report_path_rejects_input_overwrite()
-    test_resolve_report_path_rejects_non_json_suffix()
-    test_resolve_report_path_rejects_directory()
-    test_resolve_report_path_accepts_json_artifact()
-    test_write_text_atomic_replaces_report_without_temp_files()
+    for name, test_func in sorted(globals().items()):
+        if name.startswith("test_") and callable(test_func):
+            test_func()

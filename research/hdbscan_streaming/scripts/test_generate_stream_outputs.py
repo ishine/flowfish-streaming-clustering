@@ -91,7 +91,6 @@ def test_resolve_generated_stream_paths_rejects_directories() -> None:
 
 
 if __name__ == "__main__":
-    test_resolve_generated_stream_paths_accepts_data_results_and_external()
-    test_resolve_generated_stream_paths_rejects_repo_root_output()
-    test_resolve_generated_stream_paths_rejects_bad_suffixes()
-    test_resolve_generated_stream_paths_rejects_directories()
+    for name, test_func in sorted(globals().items()):
+        if name.startswith("test_") and callable(test_func):
+            test_func()

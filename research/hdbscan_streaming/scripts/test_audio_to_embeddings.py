@@ -29,5 +29,6 @@ def test_resolve_manifest_wav_path_rejects_escape_paths() -> None:
 
 
 if __name__ == "__main__":
-    test_resolve_manifest_wav_path_accepts_relative_paths()
-    test_resolve_manifest_wav_path_rejects_escape_paths()
+    for name, test_func in sorted(globals().items()):
+        if name.startswith("test_") and callable(test_func):
+            test_func()

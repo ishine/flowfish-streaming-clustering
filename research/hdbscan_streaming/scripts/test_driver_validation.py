@@ -133,10 +133,6 @@ def test_multiseed_cli_rejects_repo_root_output_before_subprocess() -> None:
 
 
 if __name__ == "__main__":
-    test_resolve_experiment_output_dir_accepts_results_and_external()
-    test_resolve_experiment_output_dir_rejects_repo_root_output()
-    test_resolve_experiment_output_dir_rejects_file_target()
-    test_validate_driver_sequences()
-    test_rate_sweep_cli_rejects_invalid_interval_before_subprocess()
-    test_rate_sweep_cli_rejects_nonfinite_interval_before_subprocess()
-    test_multiseed_cli_rejects_repo_root_output_before_subprocess()
+    for name, test_func in sorted(globals().items()):
+        if name.startswith("test_") and callable(test_func):
+            test_func()

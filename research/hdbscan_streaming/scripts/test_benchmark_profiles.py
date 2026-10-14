@@ -91,6 +91,6 @@ def test_validate_benchmark_args_reports_missing_fields() -> None:
 
 
 if __name__ == "__main__":
-    test_async_pair_benchmark_args_exposes_scale_knobs()
-    test_validate_benchmark_args_rejects_invalid_ranges()
-    test_validate_benchmark_args_reports_missing_fields()
+    for name, test_func in sorted(globals().items()):
+        if name.startswith("test_") and callable(test_func):
+            test_func()
