@@ -190,6 +190,9 @@ must stay under `data/` or `results/`. When retaining a JSON validation report,
 pass `--json-out` with a `.json` path that is distinct from the input dataset;
 the report is written through a same-directory temporary file and atomically
 replaced.
+Audio manifests may only reference relative WAV paths under `--raw-root`; empty,
+absolute, parent-directory, and backslash paths are rejected before audio
+loading.
 Experiment driver output directories are stricter: repository-local `--out`
 directories must stay under `results/`, while external scratch directories are
 allowed. Driver interval lists and benchmark profile float fields must be
@@ -201,8 +204,10 @@ Run these checks before changing benchmark drivers:
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_benchmark_profiles.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_driver_validation.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_generate_stream_outputs.py
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_audio_to_embeddings.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_validate_dataset.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_dataset.py data/synthetic_smoke.npz
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/audio_to_embeddings.py --help
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_benchmark.py --help
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/check_release.py
 ```

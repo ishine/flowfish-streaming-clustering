@@ -16,7 +16,6 @@ import time
 from pathlib import Path
 
 import numpy as np
-import soundfile as sf
 
 
 def sha256_file(path: Path) -> str:
@@ -28,6 +27,8 @@ def sha256_file(path: Path) -> str:
 
 
 def load_wav_16k_mono(path: Path) -> np.ndarray:
+    import soundfile as sf
+
     wav, sample_rate = sf.read(str(path), dtype="float32", always_2d=True)
     mono = np.asarray(wav, dtype=np.float32).mean(axis=1)
     if int(sample_rate) != 16000:
@@ -35,6 +36,20 @@ def load_wav_16k_mono(path: Path) -> np.ndarray:
 
         mono = signal.resample_poly(mono, 16000, int(sample_rate))
     return np.asarray(mono, dtype=np.float32).reshape(-1)
+
+
+def resolve_manifest_wav_path(raw_root: Path, row_path: str, row_index: int) -> Path:
+    relative_path = Path(row_path)
+    if (
+        not row_path
+        or relative_path.is_absolute()
+        or ".." in relative_path.parts
+        or "\\" in row_path
+    ):
+        raise ValueError(
+            f"manifest row {row_index} path must stay under raw_root: {row_path}"
+        )
+    return raw_root / relative_path
 
 
 def wav_to_fbank(wav: np.ndarray, n_mels: int = 80) -> np.ndarray:
@@ -154,7 +169,7 @@ def main() -> None:
     paths: list[str] = []
     elapsed_ms: list[float] = []
     for index, row in enumerate(rows):
-        wav_path = raw_root / row["path"]
+        wav_path = resolve_manifest_wav_path(raw_root, row["path"], index)
         features = wav_to_fbank(load_wav_16k_mono(wav_path))
         if features.shape[0] == 0:
             raise ValueError(f"audio is too short at row {index}: {wav_path}")
