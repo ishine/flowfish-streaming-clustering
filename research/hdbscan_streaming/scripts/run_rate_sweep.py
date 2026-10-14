@@ -9,21 +9,29 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Sequence
 
 from benchmark_profiles import async_pair_benchmark_args
+from driver_validation import validate_positive_floats
+from output_paths import resolve_experiment_output_dir
 
 
-def main() -> None:
+def main(argv: Sequence[str] | None = None) -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--data", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--intervals", type=float, nargs="+", default=[1, 5, 10, 20])
-    args = p.parse_args()
+    args = p.parse_args(argv)
     root = Path(__file__).resolve().parents[1]
+    try:
+        out_dir = resolve_experiment_output_dir(args.out, root)
+        intervals = validate_positive_floats(args.intervals, "--intervals")
+    except ValueError as exc:
+        p.error(str(exc))
     py = os.environ.get("PYTHON") or sys.executable
-    args.out.mkdir(parents=True, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
     rows = []
-    for interval in args.intervals:
+    for interval in intervals:
         common = async_pair_benchmark_args(
             interval_ms=interval,
             warmup=20,
@@ -32,7 +40,7 @@ def main() -> None:
         )
         for method in ("adaptive_fishdbc_async", "fishdbc"):
             name = f"{method}_i{interval:g}"
-            run_dir = args.out / name
+            run_dir = out_dir / name
             subprocess.run([py, str(root / "scripts/run_benchmark.py"), "--data", str(args.data),
                             "--out", str(run_dir), "--methods", method, *common], cwd=root, check=True,
                            stdout=subprocess.DEVNULL)
@@ -49,11 +57,11 @@ def main() -> None:
                          "acc": final["cluster_accuracy_noise_singletons"],
                          "ari": final["ari"], "nmi": final["nmi"],
                          "false_merge_rate": final["false_merge_rate"]})
-    out = args.out / "rate_sweep.csv"
+    out = out_dir / "rate_sweep.csv"
     with out.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader(); writer.writerows(rows)
-    (args.out / "rate_sweep.json").write_text(json.dumps(rows, indent=2) + "\n")
+    (out_dir / "rate_sweep.json").write_text(json.dumps(rows, indent=2) + "\n")
     print(json.dumps({"status": "ok", "rows": len(rows), "output": str(out)}, ensure_ascii=False))
 
 

@@ -188,11 +188,15 @@ embeddings and finite integer 1-D speaker labels in `y`. Synthetic stream
 generators write `.npz` data and `.json` metadata; repository-local outputs
 must stay under `data/` or `results/`. When retaining a JSON validation report,
 pass `--json-out` with a `.json` path that is distinct from the input dataset.
+Experiment driver output directories are stricter: repository-local `--out`
+directories must stay under `results/`, while external scratch directories are
+allowed.
 
 Run these checks before changing benchmark drivers:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_benchmark_profiles.py
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_driver_validation.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_generate_stream_outputs.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_validate_dataset.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/validate_dataset.py data/synthetic_smoke.npz

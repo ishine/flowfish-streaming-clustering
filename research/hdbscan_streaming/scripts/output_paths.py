@@ -48,3 +48,22 @@ def resolve_generated_stream_paths(
             raise ValueError(f"{label} inside the repository must be under {allowed}")
 
     return resolved_out, resolved_meta
+
+
+def resolve_experiment_output_dir(
+    out_dir: Path,
+    research_root: Path = RESEARCH_ROOT,
+) -> Path:
+    resolved_out = out_dir.expanduser().resolve(strict=False)
+    resolved_root = research_root.expanduser().resolve(strict=False)
+    allowed_dir = (resolved_root / "results").resolve(strict=False)
+
+    if out_dir.exists() and out_dir.is_file():
+        raise ValueError("--out must be a directory, not a file")
+    if path_is_relative_to(resolved_out, resolved_root) and not path_is_relative_to(
+        resolved_out,
+        allowed_dir,
+    ):
+        raise ValueError("--out inside the repository must be under results/")
+
+    return resolved_out
