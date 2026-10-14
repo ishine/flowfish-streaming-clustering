@@ -58,6 +58,14 @@ def test_validate_driver_sequences() -> None:
     else:
         raise AssertionError("expected zero interval to fail")
 
+    for candidate in (float("nan"), float("inf")):
+        try:
+            validate_positive_floats([candidate], "--intervals")
+        except ValueError as exc:
+            assert "finite" in str(exc)
+        else:
+            raise AssertionError(f"expected non-finite interval to fail: {candidate!r}")
+
     try:
         validate_nonnegative_ints([-1], "--seeds")
     except ValueError as exc:
@@ -83,6 +91,25 @@ def test_rate_sweep_cli_rejects_invalid_interval_before_subprocess() -> None:
             assert exc.code == 2
         else:
             raise AssertionError("expected invalid interval to fail")
+
+
+def test_rate_sweep_cli_rejects_nonfinite_interval_before_subprocess() -> None:
+    with tempfile.TemporaryDirectory() as tmp, redirect_stderr(StringIO()):
+        try:
+            rate_sweep_main(
+                [
+                    "--data",
+                    str(Path(tmp) / "data.npz"),
+                    "--out",
+                    str(Path(tmp) / "results" / "rate"),
+                    "--intervals",
+                    "nan",
+                ]
+            )
+        except SystemExit as exc:
+            assert exc.code == 2
+        else:
+            raise AssertionError("expected non-finite interval to fail")
 
 
 def test_multiseed_cli_rejects_repo_root_output_before_subprocess() -> None:
@@ -111,4 +138,5 @@ if __name__ == "__main__":
     test_resolve_experiment_output_dir_rejects_file_target()
     test_validate_driver_sequences()
     test_rate_sweep_cli_rejects_invalid_interval_before_subprocess()
+    test_rate_sweep_cli_rejects_nonfinite_interval_before_subprocess()
     test_multiseed_cli_rejects_repo_root_output_before_subprocess()

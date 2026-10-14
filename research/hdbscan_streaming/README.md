@@ -190,7 +190,8 @@ must stay under `data/` or `results/`. When retaining a JSON validation report,
 pass `--json-out` with a `.json` path that is distinct from the input dataset.
 Experiment driver output directories are stricter: repository-local `--out`
 directories must stay under `results/`, while external scratch directories are
-allowed.
+allowed. Driver interval lists and benchmark profile float fields must be
+finite before any child benchmark process is launched.
 
 Run these checks before changing benchmark drivers:
 

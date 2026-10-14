@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 
 
 def validate_benchmark_args(args: argparse.Namespace) -> argparse.Namespace:
@@ -28,16 +29,16 @@ def validate_benchmark_args(args: argparse.Namespace) -> argparse.Namespace:
         value = getattr(args, field_name, missing)
         if value is missing:
             raise ValueError(f"{field_name} is required")
-        if value < 0:
-            raise ValueError(f"{field_name} must be non-negative")
+        if not math.isfinite(value) or value < 0:
+            raise ValueError(f"{field_name} must be finite and non-negative")
 
     positive_float_fields = ("tradeoff_margin", "tradeoff_max_distance")
     for field_name in positive_float_fields:
         value = getattr(args, field_name, missing)
         if value is missing:
             raise ValueError(f"{field_name} is required")
-        if value <= 0:
-            raise ValueError(f"{field_name} must be greater than 0")
+        if not math.isfinite(value) or value <= 0:
+            raise ValueError(f"{field_name} must be finite and greater than 0")
 
     return args
 

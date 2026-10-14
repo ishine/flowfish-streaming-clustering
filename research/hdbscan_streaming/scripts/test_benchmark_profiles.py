@@ -58,6 +58,28 @@ def test_validate_benchmark_args_rejects_invalid_ranges() -> None:
     else:
         raise AssertionError("expected invalid arrival_interval_ms to fail")
 
+    invalid_nonfinite_interval = argparse.Namespace(
+        **{**vars(valid), "arrival_interval_ms": float("nan")}
+    )
+    try:
+        validate_benchmark_args(invalid_nonfinite_interval)
+    except ValueError as exc:
+        assert "arrival_interval_ms" in str(exc)
+        assert "finite" in str(exc)
+    else:
+        raise AssertionError("expected non-finite arrival_interval_ms to fail")
+
+    invalid_nonfinite_margin = argparse.Namespace(
+        **{**vars(valid), "tradeoff_margin": float("inf")}
+    )
+    try:
+        validate_benchmark_args(invalid_nonfinite_margin)
+    except ValueError as exc:
+        assert "tradeoff_margin" in str(exc)
+        assert "finite" in str(exc)
+    else:
+        raise AssertionError("expected non-finite tradeoff_margin to fail")
+
 
 def test_validate_benchmark_args_reports_missing_fields() -> None:
     try:
