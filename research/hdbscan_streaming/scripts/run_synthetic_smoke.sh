@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PY="$ROOT/.venv/bin/python"
+PYTHON="${PYTHON:-$ROOT/.venv/bin/python}"
 DATA="$ROOT/data/synthetic_smoke.npz"
 META="$ROOT/data/synthetic_smoke.json"
 OUT="$ROOT/results/smoke_latest"
@@ -12,16 +12,16 @@ if [[ "${RUN_FAST_HDBSCAN:-0}" == "1" ]]; then
   METHODS+=(fast_hdbscan)
 fi
 
-test -x "$PY"
-"$PY" "$ROOT/scripts/generate_stream.py" \
+command -v "$PYTHON" >/dev/null 2>&1
+"$PYTHON" "$ROOT/scripts/generate_stream.py" \
   --out "$DATA" \
   --meta "$META" \
   --speakers 5 \
   --points-per-speaker 24 \
   --dim 32 \
   --seed 20260910
-"$PY" "$ROOT/scripts/validate_dataset.py" "$DATA"
-"$PY" "$ROOT/scripts/run_benchmark.py" \
+"$PYTHON" "$ROOT/scripts/validate_dataset.py" "$DATA"
+"$PYTHON" "$ROOT/scripts/run_benchmark.py" \
   --data "$DATA" \
   --out "$OUT" \
   --methods "${METHODS[@]}" \

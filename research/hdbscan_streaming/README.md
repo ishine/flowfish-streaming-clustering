@@ -41,6 +41,10 @@ From this directory, the complete release reproduction is:
 bash scripts/reproduce_paper.sh all
 ```
 
+Use `PYTHON=/path/to/python` to run with an existing environment instead of the
+default `.venv/bin/python`. Use `OUT_ROOT=/path/to/results` to redirect generated
+outputs without editing scripts.
+
 The dispatcher also exposes `setup`, `data`, `audio`, `baseline`, `smoke`,
 `release`, and `main` modes. `data` downloads the pinned FSDD archive, verifies
 its checksum and 3000 WAV files, and writes the local provenance record. The

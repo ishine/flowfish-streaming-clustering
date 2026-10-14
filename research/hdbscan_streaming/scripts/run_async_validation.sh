@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PY="$ROOT/.venv/bin/python"
+PYTHON="${PYTHON:-$ROOT/.venv/bin/python}"
 INTERVAL_MS="${INTERVAL_MS:-5}"
 OUT_ROOT="${OUT_ROOT:-$ROOT/results/async_validation}"
 COMMON=(--warmup 12 --tradeoff-warmup 12 --tradeoff-margin 0.02
@@ -11,24 +11,24 @@ COMMON=(--warmup 12 --tradeoff-warmup 12 --tradeoff-margin 0.02
   --tradeoff-max-queue 8
   --min-cluster-size 3 --min-samples 2 --checkpoint-every 6)
 
-"$PY" "$ROOT/scripts/run_benchmark.py" --data "$ROOT/data/fsdd/embeddings/fsdd_smoke.npz" \
+"$PYTHON" "$ROOT/scripts/run_benchmark.py" --data "$ROOT/data/fsdd/embeddings/fsdd_smoke.npz" \
   --out "$OUT_ROOT/fsdd_adaptive" \
   --methods adaptive_fishdbc_async "${COMMON[@]}"
-"$PY" "$ROOT/scripts/run_benchmark.py" --data "$ROOT/data/fsdd/embeddings/fsdd_smoke.npz" \
+"$PYTHON" "$ROOT/scripts/run_benchmark.py" --data "$ROOT/data/fsdd/embeddings/fsdd_smoke.npz" \
   --out "$OUT_ROOT/fsdd_fishdbc" \
   --methods fishdbc "${COMMON[@]}"
-"$PY" "$ROOT/scripts/run_benchmark.py" --data "$ROOT/data/synthetic_320.npz" \
+"$PYTHON" "$ROOT/scripts/run_benchmark.py" --data "$ROOT/data/synthetic_320.npz" \
   --out "$OUT_ROOT/synthetic_adaptive" \
   --methods adaptive_fishdbc_async --warmup 20 --tradeoff-warmup 20 \
   --tradeoff-margin 0.02 --tradeoff-max-distance 0.70 --tradeoff-full-interval 8 \
   --tradeoff-batch-size 4 --arrival-interval-ms "$INTERVAL_MS" \
   --min-cluster-size 3 --min-samples 2 --checkpoint-every 80
-"$PY" "$ROOT/scripts/run_benchmark.py" --data "$ROOT/data/synthetic_320.npz" \
+"$PYTHON" "$ROOT/scripts/run_benchmark.py" --data "$ROOT/data/synthetic_320.npz" \
   --out "$OUT_ROOT/synthetic_fishdbc" \
   --methods fishdbc --warmup 20 --arrival-interval-ms "$INTERVAL_MS" \
   --min-cluster-size 3 --min-samples 2 --checkpoint-every 80
 
-"$PY" - "$OUT_ROOT" "$INTERVAL_MS" <<'PY'
+"$PYTHON" - "$OUT_ROOT" "$INTERVAL_MS" <<'PY'
 import json
 import csv
 import sys

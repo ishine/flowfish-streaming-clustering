@@ -2,6 +2,7 @@
 # Full main-table rerun (L/M/H, seven methods) with the repaired code.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON="${PYTHON:-$ROOT/.venv/bin/python}"
 OUT="${OUT_ROOT:-$ROOT/results/final_rerun}"
 METHODS="full_hdbscan fishdbc adaptive_fishdbc adaptive_fishdbc_async ahc sc_pna diart_style"
 
@@ -10,7 +11,7 @@ run() {
   local dest="$OUT/$label"
   mkdir -p "$dest"
   echo "=== $label ==="
-  "$ROOT/.venv/bin/python" "$ROOT/scripts/run_benchmark.py" \
+  "$PYTHON" "$ROOT/scripts/run_benchmark.py" \
     --data "$data" --out "$dest" --methods $METHODS \
     --warmup "$warmup" --tradeoff-warmup "$warmup" --tradeoff-margin .02 \
     --tradeoff-max-distance .70 --tradeoff-full-interval 8 \

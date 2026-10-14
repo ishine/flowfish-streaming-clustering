@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -16,7 +18,7 @@ def main() -> None:
     p.add_argument("--intervals", type=float, nargs="+", default=[1, 5, 10, 20])
     args = p.parse_args()
     root = Path(__file__).resolve().parents[1]
-    py = root / ".venv/bin/python"
+    py = os.environ.get("PYTHON") or sys.executable
     args.out.mkdir(parents=True, exist_ok=True)
     rows = []
     for interval in args.intervals:
@@ -28,7 +30,7 @@ def main() -> None:
         for method in ("adaptive_fishdbc_async", "fishdbc"):
             name = f"{method}_i{interval:g}"
             run_dir = args.out / name
-            subprocess.run([str(py), str(root / "scripts/run_benchmark.py"), "--data", str(args.data),
+            subprocess.run([py, str(root / "scripts/run_benchmark.py"), "--data", str(args.data),
                             "--out", str(run_dir), "--methods", method, *common], cwd=root, check=True,
                            stdout=subprocess.DEVNULL)
             item = json.loads((run_dir / method / "summary.json").read_text())

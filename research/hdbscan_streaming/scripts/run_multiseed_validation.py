@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -19,7 +20,7 @@ def main() -> None:
     p.add_argument("--interval-ms", type=float, default=5.0)
     args = p.parse_args()
     root = Path(__file__).resolve().parents[1]
-    py = root / ".venv/bin/python"
+    py = os.environ.get("PYTHON") or sys.executable
     sys.path.insert(0, str(root / "scripts"))
     from generate_stream import build_stream
 
@@ -36,7 +37,7 @@ def main() -> None:
                       "--tradeoff-batch-size", "4", "--arrival-interval-ms", str(args.interval_ms),
                       "--tradeoff-max-queue", "8",
                       "--min-cluster-size", "3", "--min-samples", "2", "--checkpoint-every", "80"]
-            subprocess.run([str(py), str(root / "scripts/run_benchmark.py"), "--data", str(data),
+            subprocess.run([py, str(root / "scripts/run_benchmark.py"), "--data", str(data),
                             "--out", str(run), "--methods", method, *common], cwd=root, check=True,
                            stdout=subprocess.DEVNULL)
             summary = json.loads((run / method / "summary.json").read_text())
