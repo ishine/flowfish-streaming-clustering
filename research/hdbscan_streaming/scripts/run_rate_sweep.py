@@ -10,6 +10,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from benchmark_profiles import async_pair_benchmark_args
+
 
 def main() -> None:
     p = argparse.ArgumentParser()
@@ -22,11 +24,12 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     rows = []
     for interval in args.intervals:
-        common = ["--warmup", "20", "--tradeoff-warmup", "20", "--tradeoff-margin", "0.02",
-                  "--tradeoff-max-distance", "0.70", "--tradeoff-full-interval", "8",
-                  "--tradeoff-batch-size", "4", "--arrival-interval-ms", str(interval),
-                  "--tradeoff-max-queue", "8",
-                  "--min-cluster-size", "3", "--min-samples", "2", "--checkpoint-every", "80"]
+        common = async_pair_benchmark_args(
+            interval_ms=interval,
+            warmup=20,
+            full_interval=8,
+            checkpoint_every=80,
+        )
         for method in ("adaptive_fishdbc_async", "fishdbc"):
             name = f"{method}_i{interval:g}"
             run_dir = args.out / name

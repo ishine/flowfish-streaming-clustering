@@ -12,6 +12,8 @@ from pathlib import Path
 
 import numpy as np
 
+from benchmark_profiles import async_pair_benchmark_args
+
 
 def main() -> None:
     p = argparse.ArgumentParser()
@@ -32,11 +34,12 @@ def main() -> None:
         np.savez_compressed(data, X=X, y=y)
         for method in ("adaptive_fishdbc_async", "fishdbc"):
             run = args.out / f"seed_{seed}" / method
-            common = ["--warmup", "20", "--tradeoff-warmup", "20", "--tradeoff-margin", "0.02",
-                      "--tradeoff-max-distance", "0.70", "--tradeoff-full-interval", "8",
-                      "--tradeoff-batch-size", "4", "--arrival-interval-ms", str(args.interval_ms),
-                      "--tradeoff-max-queue", "8",
-                      "--min-cluster-size", "3", "--min-samples", "2", "--checkpoint-every", "80"]
+            common = async_pair_benchmark_args(
+                interval_ms=args.interval_ms,
+                warmup=20,
+                full_interval=8,
+                checkpoint_every=80,
+            )
             subprocess.run([py, str(root / "scripts/run_benchmark.py"), "--data", str(data),
                             "--out", str(run), "--methods", method, *common], cwd=root, check=True,
                            stdout=subprocess.DEVNULL)

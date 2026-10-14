@@ -161,6 +161,7 @@ the plotting scripts preserve publication-quality assets for the paper build.
 | `scripts/run_audio_smoke.sh` | real-audio embedding and clustering smoke |
 | `scripts/run_full_baseline.sh` | fixture-only Full HDBSCAN baseline |
 | `scripts/run_benchmark.py` | common benchmark driver and metrics |
+| `scripts/benchmark_profiles.py` | shared benchmark argument profiles for reproduction drivers |
 | `scripts/run_async_validation.sh` | paired FlowFish/FISHDBC comparison |
 | `scripts/run_rate_sweep.py` | arrival-rate sensitivity |
 | `scripts/run_multiseed_validation.py` | five-seed robustness |
