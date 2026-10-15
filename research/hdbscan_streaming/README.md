@@ -199,6 +199,9 @@ Experiment driver output directories are stricter: repository-local `--out`
 directories must stay under `results/`, while external scratch directories are
 allowed. Driver interval lists and benchmark profile float fields must be
 finite before any child benchmark process is launched.
+Benchmark count and warmup fields must be true integers, while arrival interval,
+margin, and distance fields must be finite numbers; booleans, fractional counts,
+and numeric strings fail at the shared profile boundary.
 
 Run these checks before changing benchmark drivers:
 

@@ -91,5 +91,62 @@ def test_validate_benchmark_args_reports_missing_fields() -> None:
         raise AssertionError("expected missing benchmark field to fail")
 
 
+def test_validate_benchmark_args_rejects_non_integer_counts() -> None:
+    valid = argparse.Namespace(
+        cap=1,
+        warmup=2,
+        tradeoff_warmup=2,
+        tradeoff_margin=0.02,
+        tradeoff_max_distance=0.70,
+        tradeoff_full_interval=100,
+        tradeoff_batch_size=4,
+        arrival_interval_ms=10.0,
+        tradeoff_max_queue=8,
+        min_cluster_size=3,
+        min_samples=2,
+        checkpoint_every=10,
+    )
+    for field_name, value in (
+        ("cap", True),
+        ("tradeoff_batch_size", 4.5),
+        ("min_samples", "2"),
+    ):
+        invalid = argparse.Namespace(**{**vars(valid), field_name: value})
+        try:
+            validate_benchmark_args(invalid)
+        except ValueError as exc:
+            assert field_name in str(exc)
+        else:
+            raise AssertionError(f"invalid {field_name} was accepted: {value!r}")
+
+
+def test_validate_benchmark_args_rejects_non_numeric_floats() -> None:
+    valid = argparse.Namespace(
+        cap=1,
+        warmup=2,
+        tradeoff_warmup=2,
+        tradeoff_margin=0.02,
+        tradeoff_max_distance=0.70,
+        tradeoff_full_interval=100,
+        tradeoff_batch_size=4,
+        arrival_interval_ms=10.0,
+        tradeoff_max_queue=8,
+        min_cluster_size=3,
+        min_samples=2,
+        checkpoint_every=10,
+    )
+    for field_name, value in (
+        ("arrival_interval_ms", True),
+        ("tradeoff_margin", "0.02"),
+    ):
+        invalid = argparse.Namespace(**{**vars(valid), field_name: value})
+        try:
+            validate_benchmark_args(invalid)
+        except ValueError as exc:
+            assert field_name in str(exc)
+        else:
+            raise AssertionError(f"invalid {field_name} was accepted: {value!r}")
+
+
 if __name__ == "__main__":
     run_test_functions(globals())

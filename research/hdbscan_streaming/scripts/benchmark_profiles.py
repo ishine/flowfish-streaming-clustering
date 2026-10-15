@@ -16,27 +16,33 @@ def validate_benchmark_args(args: argparse.Namespace) -> argparse.Namespace:
         "min_cluster_size",
         "min_samples",
         "checkpoint_every",
+        "warmup",
+        "tradeoff_warmup",
     )
     for field_name in positive_int_fields:
         value = getattr(args, field_name, missing)
         if value is missing:
             raise ValueError(f"{field_name} is required")
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError(f"{field_name} must be an integer")
         if value < 1:
             raise ValueError(f"{field_name} must be at least 1")
 
-    nonnegative_fields = ("warmup", "tradeoff_warmup", "arrival_interval_ms")
-    for field_name in nonnegative_fields:
-        value = getattr(args, field_name, missing)
-        if value is missing:
-            raise ValueError(f"{field_name} is required")
-        if not math.isfinite(value) or value < 0:
-            raise ValueError(f"{field_name} must be finite and non-negative")
+    value = getattr(args, "arrival_interval_ms", missing)
+    if value is missing:
+        raise ValueError("arrival_interval_ms is required")
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError("arrival_interval_ms must be a number")
+    if not math.isfinite(value) or value < 0:
+        raise ValueError("arrival_interval_ms must be finite and non-negative")
 
     positive_float_fields = ("tradeoff_margin", "tradeoff_max_distance")
     for field_name in positive_float_fields:
         value = getattr(args, field_name, missing)
         if value is missing:
             raise ValueError(f"{field_name} is required")
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(f"{field_name} must be a number")
         if not math.isfinite(value) or value <= 0:
             raise ValueError(f"{field_name} must be finite and greater than 0")
 
