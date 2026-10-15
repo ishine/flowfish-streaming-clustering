@@ -102,8 +102,10 @@ The audio path is split into three explicit steps:
 `prepare_fsdd_audio.py` creates the seeded speaker-balanced manifest,
 `audio_to_embeddings.py` converts the manifest to the common `X`/`y` NPZ
 contract, and `run_audio_smoke.sh` executes the clustering comparison. The
-model file is an external input and is never copied into this repository. For
-a fixture-only baseline, run:
+model file is an external input and is never copied into this repository.
+The preparation CLI validates `--per-speaker` and `--seed` before importing the
+optional `soundfile` dependency, so invalid arguments and `--help` work without
+the audio extras installed. For a fixture-only baseline, run:
 
 ```bash
 bash scripts/run_full_baseline.sh

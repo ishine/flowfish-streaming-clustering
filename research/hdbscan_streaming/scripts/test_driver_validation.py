@@ -9,6 +9,7 @@ from pathlib import Path
 
 from driver_validation import validate_nonnegative_ints, validate_positive_floats
 from output_paths import resolve_experiment_output_dir
+from prepare_fsdd_audio import main as prepare_fsdd_main
 from run_multiseed_validation import main as multiseed_main
 from run_rate_sweep import main as rate_sweep_main
 from script_test_runner import run_test_functions
@@ -131,6 +132,30 @@ def test_multiseed_cli_rejects_repo_root_output_before_subprocess() -> None:
             assert exc.code == 2
         else:
             raise AssertionError("expected repository-root output to fail")
+
+
+def test_prepare_fsdd_cli_rejects_invalid_counts_before_filesystem_scan() -> None:
+    with tempfile.TemporaryDirectory() as tmp, redirect_stderr(StringIO()):
+        raw_root = Path(tmp) / "raw"
+        out_dir = Path(tmp) / "out"
+        for extra, message in (
+            (["--per-speaker", "0"], "per_speaker"),
+            (["--seed", "-1"], "seed"),
+        ):
+            try:
+                prepare_fsdd_main(
+                    [
+                        "--raw-root",
+                        str(raw_root),
+                        "--out-dir",
+                        str(out_dir),
+                        *extra,
+                    ]
+                )
+            except SystemExit as exc:
+                assert exc.code == 2
+            else:
+                raise AssertionError(f"expected invalid prepare argument to fail: {message}")
 
 
 if __name__ == "__main__":

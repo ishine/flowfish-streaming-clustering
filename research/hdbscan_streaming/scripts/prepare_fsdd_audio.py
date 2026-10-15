@@ -9,7 +9,8 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
-import soundfile as sf
+
+from stream_parameters import nonnegative_int, positive_int
 
 
 def parse_name(path: Path) -> tuple[int, str, int]:
@@ -19,17 +20,24 @@ def parse_name(path: Path) -> tuple[int, str, int]:
     return int(parts[0]), parts[1], int(parts[2])
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw-root", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--per-speaker", type=int, default=5)
     parser.add_argument("--seed", type=int, default=20260910)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     raw_root = args.raw_root.resolve()
-    if args.per_speaker <= 0:
-        raise ValueError("--per-speaker must be positive")
+    try:
+        per_speaker = positive_int("per_speaker", args.per_speaker)
+        seed = nonnegative_int("seed", args.seed)
+    except ValueError as exc:
+        parser.error(str(exc))
+    try:
+        import soundfile as sf
+    except ImportError:
+        parser.error("soundfile is required to prepare FSDD audio metadata")
     files = sorted(raw_root.rglob("*.wav"))
     if not files:
         raise FileNotFoundError(f"no WAV files under {raw_root}")
@@ -42,20 +50,20 @@ def main() -> None:
         grouped[item[1]].append(path)
 
     speakers = sorted(grouped)
-    if any(len(grouped[name]) < args.per_speaker for name in speakers):
+    if any(len(grouped[name]) < per_speaker for name in speakers):
         raise ValueError("not enough recordings for requested per-speaker count")
 
-    rng = np.random.default_rng(args.seed)
+    rng = np.random.default_rng(seed)
     selected_by_speaker: dict[str, list[Path]] = {}
     for speaker in speakers:
         candidates = np.asarray(sorted(grouped[speaker]), dtype=object)
         order = rng.permutation(len(candidates))
         selected_by_speaker[speaker] = [
-            Path(candidates[index]) for index in order[: args.per_speaker]
+            Path(candidates[index]) for index in order[:per_speaker]
         ]
 
     selected: list[Path] = []
-    for row in range(args.per_speaker):
+    for row in range(per_speaker):
         for speaker in speakers:
             selected.append(selected_by_speaker[speaker][row])
 
