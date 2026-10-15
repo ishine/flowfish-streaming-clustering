@@ -7,6 +7,8 @@ from pathlib import Path
 
 from output_paths import resolve_generated_stream_paths
 from script_test_runner import run_test_functions
+from generate_stream import build_stream as build_basic_stream
+from generate_drift_stream import build_stream as build_drift_stream
 
 
 def test_resolve_generated_stream_paths_accepts_data_results_and_external() -> None:
@@ -89,6 +91,39 @@ def test_resolve_generated_stream_paths_rejects_directories() -> None:
             assert "directory" in str(exc)
         else:
             raise AssertionError("expected directory --out to fail")
+
+
+def test_stream_builders_reject_invalid_dimensions() -> None:
+    for build, kwargs in (
+        (build_basic_stream, (8, 0, 64, 0, 0.1, 0.16, 0.05)),
+        (build_drift_stream, (8, 0, 64, 0, 0.2, 0.12)),
+        (build_basic_stream, (8, 60, 0, 0, 0.1, 0.16, 0.05)),
+        (build_drift_stream, (8, 320, True, 0, 0.2, 0.12)),
+    ):
+        try:
+            build(*kwargs)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("expected invalid builder dimensions to fail")
+
+
+def test_stream_builders_reject_non_finite_scales() -> None:
+    try:
+        build_basic_stream(8, 60, 64, 1, float("nan"), 0.16, 0.05)
+    except ValueError as exc:
+        assert "finite" in str(exc)
+    else:
+        raise AssertionError("expected non-finite scale to fail")
+
+
+def test_drift_stream_rejects_unreachable_center_similarity() -> None:
+    try:
+        build_drift_stream(8, 320, 64, 1, 0.2, 0.12, max_center_similarity=-1)
+    except ValueError as exc:
+        assert "max_center_similarity" in str(exc)
+    else:
+        raise AssertionError("expected unreachable center similarity to fail")
 
 
 if __name__ == "__main__":

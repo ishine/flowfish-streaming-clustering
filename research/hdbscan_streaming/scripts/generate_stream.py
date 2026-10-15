@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from output_paths import resolve_generated_stream_paths
+from stream_parameters import nonnegative_finite_float, nonnegative_int, positive_int
 
 
 RESEARCH_ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +36,16 @@ def build_stream(
     noise_scale: float,
     outlier_rate: float,
 ) -> tuple[np.ndarray, np.ndarray, dict]:
+    positive_int('speakers', speakers)
+    positive_int('points_per_speaker', points_per_speaker)
+    positive_int('dim', dim)
+    nonnegative_int('seed', seed)
+    nonnegative_finite_float('mode_scale', mode_scale)
+    nonnegative_finite_float('noise_scale', noise_scale)
+    nonnegative_finite_float('outlier_rate', outlier_rate)
+    if outlier_rate > 1:
+        raise ValueError('outlier_rate must be at most 1')
+
     rng = np.random.default_rng(seed)
     centers: list[np.ndarray] = []
     while len(centers) < speakers:
@@ -75,13 +86,13 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--meta", type=Path, required=True)
-    p.add_argument("--speakers", type=int, default=8)
-    p.add_argument("--points-per-speaker", type=int, default=60)
-    p.add_argument("--dim", type=int, default=64)
-    p.add_argument("--seed", type=int, default=20260910)
-    p.add_argument("--mode-scale", type=float, default=0.10)
-    p.add_argument("--noise-scale", type=float, default=0.16)
-    p.add_argument("--outlier-rate", type=float, default=0.05)
+    p.add_argument("--speakers", type=lambda value: positive_int('speakers', int(value)), default=8)
+    p.add_argument("--points-per-speaker", type=lambda value: positive_int('points_per_speaker', int(value)), default=60)
+    p.add_argument("--dim", type=lambda value: positive_int('dim', int(value)), default=64)
+    p.add_argument("--seed", type=lambda value: nonnegative_int('seed', int(value)), default=20260910)
+    p.add_argument("--mode-scale", type=lambda value: nonnegative_finite_float('mode_scale', float(value)), default=0.10)
+    p.add_argument("--noise-scale", type=lambda value: nonnegative_finite_float('noise_scale', float(value)), default=0.16)
+    p.add_argument("--outlier-rate", type=lambda value: nonnegative_finite_float('outlier_rate', float(value)), default=0.05)
     args = p.parse_args()
     try:
         out_path, meta_path = resolve_generated_stream_paths(args.out, args.meta)

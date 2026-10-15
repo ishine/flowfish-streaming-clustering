@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from output_paths import resolve_generated_stream_paths
+from stream_parameters import drift_center_similarity, nonnegative_finite_float, nonnegative_int, positive_int
 
 
 RESEARCH_ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +29,17 @@ def unit(x: np.ndarray) -> np.ndarray:
 
 def build_stream(speakers: int, points: int, dim: int, seed: int, drift: float, noise: float,
                  max_center_similarity: float = 0.45):
+    positive_int('speakers', speakers)
+    positive_int('points', points)
+    positive_int('dim', dim)
+    nonnegative_int('seed', seed)
+    nonnegative_finite_float('drift', drift)
+    nonnegative_finite_float('noise', noise)
+    max_center_similarity = drift_center_similarity(
+        'max_center_similarity',
+        max_center_similarity,
+    )
+
     rng = np.random.default_rng(seed)
     centers = []
     while len(centers) < speakers:
@@ -55,13 +67,13 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--meta", type=Path, required=True)
-    p.add_argument("--speakers", type=int, default=8)
-    p.add_argument("--points", type=int, default=320)
-    p.add_argument("--dim", type=int, default=64)
-    p.add_argument("--seed", type=int, default=20260911)
-    p.add_argument("--drift", type=float, default=0.20)
-    p.add_argument("--noise", type=float, default=0.12)
-    p.add_argument("--max-center-similarity", type=float, default=0.45)
+    p.add_argument("--speakers", type=lambda value: positive_int('speakers', int(value)), default=8)
+    p.add_argument("--points", type=lambda value: positive_int('points', int(value)), default=320)
+    p.add_argument("--dim", type=lambda value: positive_int('dim', int(value)), default=64)
+    p.add_argument("--seed", type=lambda value: nonnegative_int('seed', int(value)), default=20260911)
+    p.add_argument("--drift", type=lambda value: nonnegative_finite_float('drift', float(value)), default=0.20)
+    p.add_argument("--noise", type=lambda value: nonnegative_finite_float('noise', float(value)), default=0.12)
+    p.add_argument("--max-center-similarity", type=lambda value: drift_center_similarity('max_center_similarity', float(value)), default=0.45)
     args = p.parse_args()
     try:
         out_path, meta_path = resolve_generated_stream_paths(args.out, args.meta)
